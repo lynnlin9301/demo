@@ -16,51 +16,57 @@ import Point from './assets/content/point.png';
 
 
 function Notebook() {
-  let [mapItem, handleAdd, handleUpdate, handleDel] = useState(
+  let [mapItem, setMapItem] = useState(
+    [
+      {
+        lable: [{
+                  text: "",
+                  color: ""
+                }],
+        text: "",
+        clocktext: ""
+      }
+    ]
+  );
+
+  let [mapList, setMapList] = useState(
     [
       { 
-        id: 1,
         lable: [{
-                  id: 1,
                   text: "Hight",
                   color: "red",
                 }],
         text: "Cook Eggs Don T Boil",
-        clockactive: true,
         clocktext: "Due in 30 min",
       },
       { 
-        id: 2,
         lable: [{
-                  id: 1,
                   text: "Medium",
                   color: "grey"
                 },
                 {
-                  id: 2,
                   text: "Cook",
                   color: "blue",
                 }],
         text: "Smarter Food Choices 101 Tips For Busy Women",
-        clockactive: false,
         clocktext: "Due in 9 hours",
       }
-    ]);
-
-  handleDel = del => {
-    let id = del.target.getAttribute("id")
-      handleDel(mapItem.filter(item => item.id !== id));
-  };
-  handleAdd = add => {
-    this.setState({
-      array: [...mapItem, add]
-    });
-  };
-
+    ]
+  );
   let [addisActive, handleAddClick] = useState(false);
   let [changeisActive, handleChangeClick] = useState(false);
   let [alertisActive, handleAlertisActive] = useState(false);
 
+  // 这个地方 del 是一个变量，但是305行，要的是一个函数，所以会报错，暂时没想明白具体怎么改。因为 props 只能传递值下去，如果这里定义为 function 传递下去也是报错的，直接在孙组件里面定义del吗？
+  const del = del => {
+    let id = del.target.getAttribute("id")
+      setMapItem(mapItem.filter(item => item.id !== id));
+  };
+  const addItem = () => {
+    setMapList([...mapList,mapItem]);
+    handleAddClick(false);
+  }
+  // console.log(mapList);
 
   return (
     <div className="column">
@@ -84,9 +90,9 @@ function Notebook() {
           <p className="note-text">TODAY</p>
           <p className="note-number">6 Tasks</p>
           {
-            mapItem.map(item =>(
+            mapList.map((item, index) =>(
               <Item
-                key={item.id}
+                key={index.toString()}
                 item={item}
                 mapItem={mapItem}
                 alertisActive={alertisActive}
@@ -104,7 +110,9 @@ function Notebook() {
             mapItem={mapItem}
             addisActive={addisActive}
             handleAddClick={handleAddClick}
-            handleAdd={handleAdd}
+            setMapItem={setMapItem}
+            addItem={addItem}
+
           />
         </div>
         <div style={{display: changeisActive ? "block" : "none"}}>
@@ -117,7 +125,6 @@ function Notebook() {
         <div style={{display: alertisActive ? "block" : "none"}}>
           <Alert 
             mapItem={mapItem}
-            handleDel={handleDel}
             alertisActive={alertisActive}
             handleAlertisActive={handleAlertisActive}
           />
@@ -146,13 +153,13 @@ function Item(props) {
       <div className="note-list-icon">
         <img alt="Tick" src={Tick} />
       </div>
-      {item.lable.map((lable) =>
-        <div className="note-list-border" key={lable.id}>
-          <button className={["note-list-border-"+lable.color]}>
+      {item.lable.map((lable, index) =>
+        <div className="note-list-border" key={index.toString()}>
+          <div className={["note-list-border-"+lable.color]}>
             <div className="note-list-text">
               {lable.text}
             </div>
-          </button>
+          </div>
         </div>
       )}
       <div className="note-list-text">
@@ -184,8 +191,7 @@ function MenuList(props) {
 }
 
 function AddDialog(props) {
-  let { mapItem, addisActive, handleAddClick, handleAdd } = props;
-  console.log(mapItem);
+  let { mapItem, addisActive, handleAddClick, addItem, setMapItem } = props;
   return(
     <div className="dialog">
       <fieldset>
@@ -194,13 +200,14 @@ function AddDialog(props) {
           <div>标签文字</div>
           <input 
             type="text"
-            // onChange={((e) => handleAdd(e.target.mapItem.lable[mapItem.id+1].text))}
+            // 这个地方，我不知道怎么写次一级的 lable 里面的数据添加了，我写了2种，都不对。
+            // onChange={e => setMapItem({...mapItem, {...lable, text:e.target.value}})}
             />
         </div>
         <div className="dialog-content">
           <div>标签颜色</div>
           <select
-            onChange={((e) => handleAdd(e.target.mapItem.lable[0].color))}
+            // onChange={e => setMapItem({...mapItem, lable.color:e.target.value})}
           >
             <option value="red">red</option>
             <option value="blue">blue</option>
@@ -212,14 +219,14 @@ function AddDialog(props) {
           <div>内容</div>
           <input 
             type="text"
-            // onChange={((e) => handleAdd(e.target.mapItem.text))}
+            onChange={e => setMapItem({...mapItem, text:e.target.value})}
           />
         </div>
         <div className="dialog-content">
           <div>时间</div>
           <div>
             <select
-              onChange={((e) => handleAdd(e.target.mapItem.clocktext))}
+              onChange={e => setMapItem({...mapItem, clocktext:e.target.value})}
             >
               <option value="Due in 30 min">Due in 30 min</option>
               <option value="Due in 1 hours">Due in 1 hours</option>
@@ -229,12 +236,11 @@ function AddDialog(props) {
         </div>
         <div className="dialog-button">
           <button onClick={() => handleAddClick(addisActive=false)}>取消</button>
-          <button type="submit">提交</button>
+          <button type="submit" onClick={addItem}>提交</button>
         </div>
       </fieldset>
     </div>
   );
-
 }
 
 function ChangeDialog(props) {
@@ -279,11 +285,10 @@ function ChangeDialog(props) {
       </fieldset>
     </div>
   );
-
 }
 
 function Alert(props) {
-  let { mapItem, handleDel, alertisActive, handleAlertisActive } = props;
+  let { mapItem, del, alertisActive, handleAlertisActive } = props;
   return(
     <div className="dialog-alert" >
       <fieldset>
@@ -291,7 +296,8 @@ function Alert(props) {
       <div>数据无法恢复，是否删除?</div>
       <div className="dialog-button">
         <button onClick={() => handleAlertisActive(alertisActive=false)}>取消</button>
-        <button onClick={() => handleDel(mapItem)}>确定</button>
+        {/*这里要的是一个函数，对应上面 61 行代码*/}
+        <button onClick={() => del(mapItem)}>确定</button>
       </div>
       </fieldset>
     </div>
@@ -300,46 +306,36 @@ function Alert(props) {
 
 // 怎么提交表单的简化版 
 function Test() {
-  let [name, setUserName] = useState();  // 这里是，定义一个 变量 username ，并且定义一个函数更新 usename 的 函数 setUserName 
-  let [names, onFormSubmit] = useState([]); //同上
-  
-
-  let Submit = (e) => {
-    e.preventDefault()
-    onFormSubmit([...names, name]);
+  const [name, setName, delName] = React.useState({
+    firstName: "",
+    lastName: ""
+  });
+  const [nameList, setNameList] = React.useState([
+    {
+      firstName: "lynn",
+      lastName: "lin"
+    },
+    {
+      firstName: "yuanjian",
+      lastName: "chang"
+    }]);
+  const submit = () => {
+    setNameList([...nameList,name])
   }
 
-  return(
+  return (
     <div>
-        <h1>注册表</h1>
-        <form onSubmit={Submit}>
-          <input 
-            type="text"
-            value={name}
-            onChange={(e) => setUserName(e.target.value)} />
-          
-          <input type="submit" value="提交"/>
-        </form>
-        <div>
-          <h3>名字</h3>
-          <ul>
-            {
-              names.map((name, index) => {
-                return <li key={index.toString()}>
-                        {name}
-                      </li>
-              })
-            }
-          </ul>
-        </div>
-      </div>
-  );
+      <input type="text" value={name.firstName} onChange={e =>setName({...name, firstName:e.target.value})} />
+      <input type="text" value={name.lastName} onChange={e =>setName({...name, lastName:e.target.value})} />
+      <button onClick={submit}>Submit</button>
+      {nameList.map(item => <div>{item.firstName}{item.lastName}</div>)}
+    </div>
+  )
 }
 
 
 
-
 ReactDOM.render(
-  <Test />,
+  <Notebook />,
   document.getElementById('root')
 );
