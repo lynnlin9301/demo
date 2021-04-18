@@ -1,4 +1,4 @@
-.dialog {
+.add-dialog {
   width: 400px;
   height: 200px;
   text-align: center;
@@ -7,6 +7,19 @@
   left: 440px;
   margin: 0px;
   background: #ffffff;
+  z-index: 1;
+}
+
+.change-dialog {
+  width: 400px;
+  height: 200px;
+  text-align: center;
+  position: absolute;
+  top: 60px;
+  left: 285px;
+  margin: 0px;
+  background: #ffffff;
+  z-index: 1;
 }
 
 .dialog-content {
@@ -20,12 +33,12 @@
   justify-content: space-between;
 }
 
-.dialog-alert {
+.delete-dialog {
   background: #ffffff;
   width: 240px;
   height: 90px;
   text-align: center;
   position: absolute;
-  top: 389px;
-  left: 534px;
+  left: 360px;
+  z-index: 1;
 }
