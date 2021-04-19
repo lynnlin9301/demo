@@ -33,7 +33,9 @@ NoteBook
       - Item N
 */
 
+
 function NoteBook() {
+  let [itemList, setItemList] = useState([]);
   let [mapItem, setMapItem] = useState(
     [
       { 
@@ -63,10 +65,12 @@ function NoteBook() {
     < SideBar />
     < Content
       mapItem={mapItem}
+      setMapItem={setMapItem}
+      itemList={itemList}
+      setItemList={setItemList}
     />
     </div>
   );
-
 }
 
 function SideBar() {
@@ -84,18 +88,27 @@ function SideBar() {
 }
 
 function Content(props) {
-  let { mapItem } = props; 
+  let { mapItem, setMapItem, itemList, setItemList } = props; 
   return (
     <div className="column-content">
-      < ContentTitle />
+      < ContentTitle
+        mapItem={mapItem}
+        setMapItem={setMapItem}
+        itemList={itemList}
+        setItemList={setItemList}
+      />
       < ItemList
         mapItem={mapItem}
+        setMapItem={setMapItem}
+        itemList={itemList}
+        setItemList={setItemList}
       />
     </div>
   );
 }
 
-function ContentTitle() {
+function ContentTitle(props) {
+  let { mapItem, setMapItem, itemList, setItemList } = props; 
   let [addisActive, handleAddClick] = useState(false);
   return (
     <div className="content-nav">
@@ -105,6 +118,10 @@ function ContentTitle() {
       < AddItem
         addisActive={addisActive}
         handleAddClick={handleAddClick}
+        mapItem={mapItem}
+        setMapItem={setMapItem}
+        itemList={itemList}
+        setItemList={setItemList}       
       />
     </div>
   );
@@ -113,7 +130,13 @@ function ContentTitle() {
 
 
 function AddItem(props) {
-  let { addisActive, handleAddClick } = props;
+  let { addisActive, handleAddClick, mapItem, setMapItem, itemList, setItemList } = props;
+  let addSubmit = () => {
+    setMapItem([...mapItem, itemList]);   
+    handleAddClick(addisActive=false)
+  }
+  console.log(itemList);
+  
   if (addisActive) {
     return (
       <div className="add-dialog">
@@ -123,11 +146,21 @@ function AddItem(props) {
             <div>标签文字</div>
             <input 
               type="text"
+              /* 这里有个问题，这里的 lable:[] 的写法，是我根据文档自己写的，
+                 但是有一个问题，155行和161行，不能同时加数据。我本意是想，两个数据，加到一个lable 里面的，没想出来写法
+                 我尝试了以下搜索：
+                 - react 新增复杂数组
+                 - react 新增二维数组
+                 - react 更新复杂数组
+                 都没找到啥比较好的，大佬看看，这个搜索思路对不？
+              */
+              onChange={e =>setItemList({...itemList, lable:[{text:e.target.value}]})}
               />
           </div>
           <div className="dialog-content">
             <div>标签颜色</div>
             <select
+              onChange={e =>setItemList({...itemList, lable:[{color:e.target.value}]})}
             >
               <option value="red">red</option>
               <option value="blue">blue</option>
@@ -139,12 +172,14 @@ function AddItem(props) {
             <div>内容</div>
             <input 
               type="text"
+              onChange={e =>setItemList({...itemList, text:e.target.value})}
             />
           </div>
           <div className="dialog-content">
             <div>时间</div>
             <div>
               <select
+                onChange={e =>setItemList({...itemList, clocktext:e.target.value})}
               >
                 <option value="Due in 30 min">Due in 30 min</option>
                 <option value="Due in 1 hours">Due in 1 hours</option>
@@ -154,7 +189,7 @@ function AddItem(props) {
           </div>
           <div className="dialog-button">
             <button onClick={() => handleAddClick(addisActive=false)}>取消</button>
-            <button type="submit">提交</button>
+            <button onClick={addSubmit} type="submit">提交</button>
           </div>
         </fieldset>
       </div>
@@ -165,7 +200,7 @@ function AddItem(props) {
 }
 
 function ItemList(props) {
-  let { mapItem } = props; 
+  let { mapItem, setMapItem, itemList, setItemList } = props; 
   return (
     <div className="note">
       <p className="backgroundtext">TODAY</p>
@@ -174,9 +209,12 @@ function ItemList(props) {
       {
         mapItem.map((item, index) =>(
           <Item
-            key={index.toString()}
+            key={index}
             item={item}
             mapItem={mapItem}
+            setMapItem={setMapItem}
+            itemList={itemList}
+            setItemList={setItemList}
           />
           )
         )
@@ -186,12 +224,16 @@ function ItemList(props) {
 }
 
 function Item(props) {
-  let { item, mapItem } = props;
+  let { item, mapItem, setMapItem, itemList, setItemList } = props;
   let isDrop;
   let [isActive, handleClick] = useState(false);
 
   if (isActive) {
     isDrop = <MenuList
+      mapItem={mapItem}
+      setMapItem={setMapItem}
+      itemList={itemList}
+      setItemList={setItemList}
     />
   };
 
@@ -201,7 +243,7 @@ function Item(props) {
         <img alt="Tick" src={Tick} />
       </div>
       {item.lable.map((lable, index) =>
-        <div className="note-list-border" key={index.toString()}>
+        <div className="note-list-border" key={index}>
           <div className={["note-list-border-"+lable.color]}>
             <div className="note-list-text">
               {lable.text}
@@ -226,18 +268,23 @@ function Item(props) {
   );
 }
 
-function MenuList() {
+function MenuList(props) {
+  let { item, mapItem, setMapItem, itemList, setItemList } = props;
   let [changeisActive, handleChangeClick] = useState(false);
   let [deleteisActive, handleDeleteisActive] = useState(false);
   return(
     <div className="note-list-menubutton" >
       <div onClick={() => handleChangeClick(changeisActive=true)}><button>修改</button></div>
       <ChangeItem
+        mapItem={mapItem}
+        setMapItem={setMapItem}
         changeisActive={changeisActive}
         handleChangeClick={handleChangeClick}
       />
       <div onClick={() => handleDeleteisActive(deleteisActive=true)}><button>删除</button></div>
       <DeleteItem
+        mapItem={mapItem}
+        setMapItem={setMapItem}
         deleteisActive={deleteisActive}
         handleDeleteisActive={handleDeleteisActive}
       />
@@ -246,7 +293,12 @@ function MenuList() {
 }
 
 function ChangeItem(props) {
-  let {changeisActive, handleChangeClick } = props;
+  let {changeisActive, handleChangeClick, mapItem, setMapItem } = props;
+  // 这里 可以用 useEffect 更新数组？
+  let changeSubmit = () => {
+    const newMapItem = [...mapItem];
+    handleChangeClick(changeisActive=false)
+  }
   if (changeisActive) {
     return(
       <div className="change-dialog">
@@ -260,7 +312,8 @@ function ChangeItem(props) {
           </div>
           <div className="dialog-content">
             <div>标签颜色</div>
-            <select >
+            <select
+            >
               <option value="red">red</option>
               <option value="blue">blue</option>
               <option value="grey">grey</option>
@@ -269,12 +322,15 @@ function ChangeItem(props) {
           </div>
           <div className="dialog-content">
             <div>内容</div>
-            <input type="text" />
+            <input
+              type="text"
+            />
           </div>
           <div className="dialog-content">
             <div>时间</div>
             <div>
-              <select>
+              <select
+              >
                 <option value="Due in 30 min">Due in 30 min</option>
                 <option value="Due in 1 hours">Due in 1 hours</option>
                 <option value="Due in 2 hours">Due in 2 hours</option>
@@ -283,7 +339,7 @@ function ChangeItem(props) {
           </div>
           <div className="dialog-button">
             <button onClick={() => handleChangeClick(changeisActive=false)}>取消</button>
-            <button>提交</button>
+            <button onClick={changeSubmit}>提交</button>
           </div>
         </fieldset>
       </div>
@@ -294,7 +350,31 @@ function ChangeItem(props) {
 }
 
 function DeleteItem(props) {
-  let {deleteisActive, handleDeleteisActive } = props;
+  let {deleteisActive, handleDeleteisActive, mapItem, setMapItem } = props;
+
+  /*这个地方本来是用 filter 去筛选，这样以后如果多选删除就比较方便，研究了很久，还是有问题
+    我原本的预想是，setMapItem 方法，更新mapItem，filter id, 然后剩下的内容返回。但是 console 的结果，发现 ，mapItem.id 返回的是undefined。这个没想明白。
+    这里的数据流，mapItem 应该是传下来了。
+    原本的代码内容：
+    let delSubmit = () => {
+      setMapItem(mapItem.filter(item => item.id !== mapItem.id));
+      handleDeleteisActive(deleteisActive=false)
+    }
+  */
+
+  let delSubmit = (index) => {
+    const newMapItem = [...mapItem];
+    /* 
+      这里的 index 是不受控的。所以删除，稳定删除[0] 的内容。
+      我知道在 387行，要这样写，onClick={() => delSubmit(XXX)} ,但是暂时我还不知道 XXX 这个地方，怎么拿到对应的 index 的值
+    */
+    newMapItem.splice(index, 1);
+    // console.log(index);
+    setMapItem(newMapItem);
+    handleDeleteisActive(deleteisActive=false)
+  };
+
+
   if (deleteisActive) {
     return(
       <div className="delete-dialog">
@@ -303,15 +383,15 @@ function DeleteItem(props) {
         <div>数据无法恢复，是否删除?</div>
         <div className="dialog-button">
           <button onClick={() => handleDeleteisActive(deleteisActive=false)}>取消</button>
-          <button>确定</button>
+          <button onClick={delSubmit}>确定</button>
         </div>
         </fieldset>
       </div>
     );
   }
-  
   return null;
 }
+
 
 ReactDOM.render(
   <NoteBook />,
