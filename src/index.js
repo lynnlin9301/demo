@@ -35,7 +35,6 @@ NoteBook
 
 
 function NoteBook() {
-  let [itemList, setItemList] = useState([]);
   let [mapItem, setMapItem] = useState(
     [
       { 
@@ -66,8 +65,6 @@ function NoteBook() {
     < Content
       mapItem={mapItem}
       setMapItem={setMapItem}
-      itemList={itemList}
-      setItemList={setItemList}
     />
     </div>
   );
@@ -88,27 +85,23 @@ function SideBar() {
 }
 
 function Content(props) {
-  let { mapItem, setMapItem, itemList, setItemList } = props; 
+  let { mapItem, setMapItem } = props; 
   return (
     <div className="column-content">
       < ContentTitle
         mapItem={mapItem}
         setMapItem={setMapItem}
-        itemList={itemList}
-        setItemList={setItemList}
       />
       < ItemList
         mapItem={mapItem}
         setMapItem={setMapItem}
-        itemList={itemList}
-        setItemList={setItemList}
       />
     </div>
   );
 }
 
 function ContentTitle(props) {
-  let { mapItem, setMapItem, itemList, setItemList } = props; 
+  let { mapItem, setMapItem } = props; 
   let [addisActive, handleAddClick] = useState(false);
   return (
     <div className="content-nav">
@@ -119,9 +112,7 @@ function ContentTitle(props) {
         addisActive={addisActive}
         handleAddClick={handleAddClick}
         mapItem={mapItem}
-        setMapItem={setMapItem}
-        itemList={itemList}
-        setItemList={setItemList}       
+        setMapItem={setMapItem}      
       />
     </div>
   );
@@ -130,12 +121,15 @@ function ContentTitle(props) {
 
 
 function AddItem(props) {
-  let { addisActive, handleAddClick, mapItem, setMapItem, itemList, setItemList } = props;
+  let { addisActive, handleAddClick, mapItem, setMapItem } = props;
+  let [itemList, setItemList] = useState([]);
+  let [lable, setLable] = useState([]);
+  console.log(itemList);
   let addSubmit = () => {
     setMapItem([...mapItem, itemList]);   
     handleAddClick(addisActive=false)
+
   }
-  console.log(itemList);
   
   if (addisActive) {
     return (
@@ -147,20 +141,20 @@ function AddItem(props) {
             <input 
               type="text"
               /* 这里有个问题，这里的 lable:[] 的写法，是我根据文档自己写的，
-                 但是有一个问题，157行和163行，不能同时加数据。我本意是想，两个数据，加到一个lable 里面的，没想出来写法
+                 但是有一个问题，152行和158行，不能同时加数据。我本意是想，两个数据，加到一个lable 里面的，没想出来写法
                  我尝试了以下搜索：
                  - react 新增复杂数组
                  - react 新增二维数组
                  - react 更新复杂数组
                  都没找到啥比较好的，大佬看看，这个搜索思路对不？
               */
-              onChange={e =>setItemList({...itemList, lable:[{text:e.target.value}]})}
+              onChange={e =>setLable({...lable, text:e.target.value})}
               />
           </div>
           <div className="dialog-content">
             <div>标签颜色</div>
             <select
-              onChange={e =>setItemList({...itemList, lable:[{color:e.target.value}]})}
+              onChange={e =>setLable({...lable, color:e.target.value})}
             >
               <option value="red">red</option>
               <option value="blue">blue</option>
@@ -200,7 +194,7 @@ function AddItem(props) {
 }
 
 function ItemList(props) {
-  let { mapItem, setMapItem, itemList, setItemList } = props; 
+  let { mapItem, setMapItem } = props; 
   return (
     <div className="note">
       <p className="backgroundtext">TODAY</p>
@@ -213,8 +207,6 @@ function ItemList(props) {
             item={item}
             mapItem={mapItem}
             setMapItem={setMapItem}
-            itemList={itemList}
-            setItemList={setItemList}
           />
           )
         )
@@ -224,7 +216,7 @@ function ItemList(props) {
 }
 
 function Item(props) {
-  let { item, mapItem, setMapItem, itemList, setItemList } = props;
+  let { item, mapItem, setMapItem } = props;
   let isDrop;
   let [isActive, handleClick] = useState(false);
 
@@ -232,8 +224,6 @@ function Item(props) {
     isDrop = <MenuList
       mapItem={mapItem}
       setMapItem={setMapItem}
-      itemList={itemList}
-      setItemList={setItemList}
     />
   };
 
@@ -361,6 +351,9 @@ function DeleteItem(props) {
       handleDeleteisActive(deleteisActive=false)
     }
   */
+  console.log(mapItem);
+  let textid = mapItem.indexOf();
+  console.log(textid);
 
   let delSubmit = (index) => {
     const newMapItem = [...mapItem];
@@ -368,8 +361,8 @@ function DeleteItem(props) {
       这里的 index 是不受控的。所以删除，稳定删除[0] 的内容。
       我知道在 387行，要这样写，onClick={() => delSubmit(XXX)} ,但是暂时我还不知道 XXX 这个地方，怎么拿到对应的 index 的值
     */
-    newMapItem.splice(index, 1);
-    // console.log(index);
+    newMapItem.splice(textid, 1);
+    console.log(textid);
     setMapItem(newMapItem);
     handleDeleteisActive(deleteisActive=false)
   };
