@@ -1,6 +1,6 @@
 .add-dialog {
   width: 400px;
-  height: 260px;
+  height: 200px;
   text-align: center;
   position: absolute;
   top: 300px;
@@ -12,7 +12,7 @@
 
 .change-dialog {
   width: 400px;
-  height: 260px;
+  height: 200px;
   text-align: center;
   position: absolute;
   top: 60px;

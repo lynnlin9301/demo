@@ -38,29 +38,16 @@ function NoteBook() {
   let [mapItem, setMapItem] = useState(
     [
       { 
-        id: 1,
-        lable: [{
-                  id: 1,
-                  text: "Hight",
-                  color: "red",
-                }],
+        labletext: "Hight",
+        lablecolor: "red",
         text: "Cook Eggs Don T Boil",
         clocktext: "Due in 30 min",
       },
       { 
-        id: 2,
-        lable: [{
-                  id: 1,
-                  text: "Medium",
-                  color: "grey"
-                },
-                {
-                  id: 2,
-                  text: "Cook",
-                  color: "blue",
-                }],
+        labletext: "Cook",
+        lablecolor: "blue",
         text: "Smarter Food Choices 101 Tips For Busy Women",
-        clocktext: "Due in 9 hours",
+        clocktext: "Due in 1 hours",
       }
     ]
   );
@@ -124,25 +111,13 @@ function ContentTitle(props) {
   
 }
 
-
 function AddItem(props) {
   let { addisActive, handleAddClick, mapItem, setMapItem } = props;
-  let [itemList, setItemList] = useState([]);
-  let [newLable, setnewLable] = useState([]);
+  let [addItem, setaddItem] = useState({});
 
-  // 拿到最大id
-  // let maxId = Math.max.apply(Math, mapItem.map(item => {return item.id}));
-  console.log(newLable);
-  console.log(itemList);
-  let addLable = () => {
-    setnewLable({...newLable, id: 1});
-    // setMapItem({...itemList, lable:newLable})
-  }
   let addSubmit = () => {
-    // setItemList({...itemList, id: maxId+1})
-    setMapItem(...mapItem, itemList);
+    setMapItem([...mapItem, addItem]);
     handleAddClick(addisActive=false)
-
   }
   
   if (addisActive) {
@@ -150,43 +125,39 @@ function AddItem(props) {
       <div className="add-dialog">
         <fieldset>
           <legend>新增数据</legend>
-          <fieldset>
-            <legend>新增标签</legend>
             <div className="dialog-content">
               <div>标签文字</div>
               <input 
                 type="text"
-                onChange={e =>setnewLable({...newLable, text:e.target.value})}
+                onChange={e =>setaddItem({...addItem, labletext:e.target.value})}
                 />
             </div>
             <div className="dialog-content">
               <div>标签颜色</div>
               <select
-                onChange={e =>setnewLable({...newLable, color:e.target.value})}
+                onChange={e =>setaddItem({...addItem, lablecolor:e.target.value})}
               >
+                <option></option>
                 <option value="red">red</option>
                 <option value="blue">blue</option>
                 <option value="grey">grey</option>
                 <option value="green">green</option>
               </select>
             </div>
-            <div className="dialog-lable">
-              <button onClick={addLable} type="submit">提交</button>
-            </div>
-          </fieldset>
           <div className="dialog-content">
             <div>内容</div>
             <input 
               type="text"
-              onChange={e =>setItemList({...itemList, text:e.target.value})}
+              onChange={e =>setaddItem({...addItem, text:e.target.value})}
             />
           </div>
           <div className="dialog-content">
             <div>时间</div>
             <div>
               <select
-                onChange={e =>setItemList({...itemList, clocktext:e.target.value})}
+                onChange={e =>setaddItem({...addItem, clocktext:e.target.value})}
               >
+                <option></option>
                 <option value="Due in 30 min">Due in 30 min</option>
                 <option value="Due in 1 hours">Due in 1 hours</option>
                 <option value="Due in 2 hours">Due in 2 hours</option>
@@ -214,33 +185,30 @@ function ItemList(props) {
       <p className="note-text">TODAY</p>
       <p className="note-number">6 Tasks</p>
       {
-        mapItem.map((item) =>(
+        mapItem.map((item, index) =>(
           <Item
-            key={item.id}
+            key={index}
             item={item}
             mapItem={mapItem}
             setMapItem={setMapItem}
-            itemId={item.id}
+            itemIndex={index}
           />
           )
         )
       }
     </div>
   );
-
 }
 
 function Item(props) {
-  let { item, mapItem, setMapItem, itemId } = props;
-
-  // console.log(itemId);
+  let { item, mapItem, setMapItem, itemIndex } = props;
   let isDrop;
   let [isActive, handleClick] = useState(false);
   if (isActive) {
     isDrop = <MenuList
       mapItem={mapItem}
       setMapItem={setMapItem}
-      itemId={itemId}
+      itemIndex={itemIndex}
     />
   };
 
@@ -249,15 +217,13 @@ function Item(props) {
       <div className="note-list-icon">
         <img alt="Tick" src={Tick} />
       </div>
-      {item.lable.map((lable) =>
-        <div className="note-list-border" key={lable.id}>
-          <div className={["note-list-border-"+lable.color]}>
+        <div className="note-list-border">
+          <div className={["note-list-border-"+item.lablecolor]}>
             <div className="note-list-text">
-              {lable.text}
+              {item.labletext}
             </div>
           </div>
         </div>
-      )}
       <div className="note-list-text">
         {item.text}
       </div>
@@ -276,7 +242,7 @@ function Item(props) {
 }
 
 function MenuList(props) {
-  let { item, mapItem, setMapItem, itemList, setItemList, itemId } = props;
+  let { item, mapItem, setMapItem, itemList, setItemList, itemIndex } = props;
   let [changeisActive, handleChangeClick] = useState(false);
   let [deleteisActive, handleDeleteisActive] = useState(false);
   return(
@@ -287,6 +253,7 @@ function MenuList(props) {
         setMapItem={setMapItem}
         changeisActive={changeisActive}
         handleChangeClick={handleChangeClick}
+        itemIndex={itemIndex}
       />
       <div onClick={() => handleDeleteisActive(deleteisActive=true)}><button>删除</button></div>
       <DeleteItem
@@ -294,17 +261,19 @@ function MenuList(props) {
         setMapItem={setMapItem}
         deleteisActive={deleteisActive}
         handleDeleteisActive={handleDeleteisActive}
-        itemId={itemId}
+        itemIndex={itemIndex}
       />
     </div>
   );
 }
 
 function ChangeItem(props) {
-  let {changeisActive, handleChangeClick, mapItem, setMapItem } = props;
-  // 这里 可以用 useEffect 更新数组？
-  let changeSubmit = () => {
-    const newMapItem = [...mapItem];
+  let {changeisActive, handleChangeClick, mapItem, setMapItem, itemIndex } = props;
+  let item = mapItem[itemIndex];
+  let [changeItem, setChangeItem] = useState();
+
+  let changeSubmit = (e) => {
+    setMapItem([...mapItem.slice(0, itemIndex), e, ...mapItem.slice(itemIndex+1)]);
     handleChangeClick(changeisActive=false)
   }
   if (changeisActive) {
@@ -312,38 +281,40 @@ function ChangeItem(props) {
       <div className="change-dialog">
         <fieldset>
           <legend>修改数据</legend>
-          <fieldset>
-            <legend>修改标签</legend>
-            <div className="dialog-content">
-              <div>标签文字</div>
-              <input 
-                type="text"
-                />
-            </div>
-            <div className="dialog-content">
-              <div>标签颜色</div>
-              <select
-              >
-                <option value="red">red</option>
-                <option value="blue">blue</option>
-                <option value="grey">grey</option>
-                <option value="green">green</option>
-              </select>
-            </div>
-            <div className="dialog-lable">
-              <button type="submit">提交</button>
-            </div>
-          </fieldset>
+          <div className="dialog-content">
+            <div>标签文字</div>
+            <input 
+              type="text"
+              defaultValue={item.labletext}
+              onChange={e =>setChangeItem({...changeItem, labletext:e.target.value})}
+              />
+          </div>
+          <div className="dialog-content">
+            <div>标签颜色</div>
+            <select
+              defaultValue={item.lablecolor}
+              onChange={e =>setChangeItem({...changeItem, lablecolor:e.target.value})}
+            >
+              <option value="red">red</option>
+              <option value="blue">blue</option>
+              <option value="grey">grey</option>
+              <option value="green">green</option>
+            </select>
+          </div>
           <div className="dialog-content">
             <div>内容</div>
             <input
               type="text"
+              defaultValue={item.text}
+              onChange={e =>setChangeItem({...changeItem, text:e.target.value})}
             />
           </div>
           <div className="dialog-content">
             <div>时间</div>
             <div>
               <select
+                defaultValue={item.clocktext}
+                onChange={e =>setChangeItem({...changeItem, clocktext:e.target.value})}
               >
                 <option value="Due in 30 min">Due in 30 min</option>
                 <option value="Due in 1 hours">Due in 1 hours</option>
@@ -353,7 +324,7 @@ function ChangeItem(props) {
           </div>
           <div className="dialog-button">
             <button onClick={() => handleChangeClick(changeisActive=false)}>取消</button>
-            <button onClick={changeSubmit}>提交</button>
+            <button onClick={() => changeSubmit(changeItem)}>提交</button>
           </div>
         </fieldset>
       </div>
@@ -364,10 +335,10 @@ function ChangeItem(props) {
 }
 
 function DeleteItem(props) {
-  let {deleteisActive, handleDeleteisActive, mapItem, setMapItem, itemId } = props;
+  let {deleteisActive, handleDeleteisActive, mapItem, setMapItem, itemIndex } = props;
 
-  let delSubmit = (id) => {
-     setMapItem(mapItem.filter(item => item.id !== id));
+  let delSubmit = (e) => {
+     setMapItem(mapItem.filter((item, index) => index !== e));
     handleDeleteisActive(deleteisActive=false)
   };
 
@@ -379,7 +350,7 @@ function DeleteItem(props) {
         <div>数据无法恢复，是否删除?</div>
         <div className="dialog-button">
           <button onClick={() => handleDeleteisActive(deleteisActive=false)}>取消</button>
-          <button onClick={() => delSubmit(itemId)}>确定</button>
+          <button onClick={() => delSubmit(itemIndex)}>确定</button>
         </div>
         </fieldset>
       </div>
