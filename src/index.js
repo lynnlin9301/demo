@@ -38,16 +38,20 @@ function NoteBook() {
   let [mapItem, setMapItem] = useState(
     [
       { 
-        labletext: "Hight",
-        lablecolor: "red",
+        lable: [{
+                  text: "Hight",
+                  color: "red",
+                }],              
         text: "Cook Eggs Don T Boil",
         clocktext: "Due in 30 min",
       },
       { 
-        labletext: "Cook",
-        lablecolor: "blue",
+        lable: [{
+                  text: "Cook",
+                  color: "blue",
+                }],
         text: "Smarter Food Choices 101 Tips For Busy Women",
-        clocktext: "Due in 1 hours",
+        clocktext: "Due in 2 hours",
       }
     ]
   );
@@ -113,10 +117,12 @@ function ContentTitle(props) {
 
 function AddItem(props) {
   let { addisActive, handleAddClick, mapItem, setMapItem } = props;
-  let [addItem, setaddItem] = useState({});
+  let [addItem, setAddItem] = useState({});
+  let [lable, setLable] = useState({});
+  let newAddItem = Object.assign(addItem, {lable:[lable]});
 
   let addSubmit = () => {
-    setMapItem([...mapItem, addItem]);
+    setMapItem([...mapItem, newAddItem]);
     handleAddClick(addisActive=false)
   }
   
@@ -129,13 +135,13 @@ function AddItem(props) {
               <div>标签文字</div>
               <input 
                 type="text"
-                onChange={e =>setaddItem({...addItem, labletext:e.target.value})}
+                onChange={e =>setLable({...lable, text:e.target.value})}
                 />
             </div>
             <div className="dialog-content">
               <div>标签颜色</div>
               <select
-                onChange={e =>setaddItem({...addItem, lablecolor:e.target.value})}
+                onChange={e =>setLable({...lable, color:e.target.value})}
               >
                 <option></option>
                 <option value="red">red</option>
@@ -148,14 +154,14 @@ function AddItem(props) {
             <div>内容</div>
             <input 
               type="text"
-              onChange={e =>setaddItem({...addItem, text:e.target.value})}
+              onChange={e =>setAddItem({...addItem, text:e.target.value})}
             />
           </div>
           <div className="dialog-content">
             <div>时间</div>
             <div>
               <select
-                onChange={e =>setaddItem({...addItem, clocktext:e.target.value})}
+                onChange={e =>setAddItem({...addItem, clocktext:e.target.value})}
               >
                 <option></option>
                 <option value="Due in 30 min">Due in 30 min</option>
@@ -217,13 +223,15 @@ function Item(props) {
       <div className="note-list-icon">
         <img alt="Tick" src={Tick} />
       </div>
-        <div className="note-list-border">
-          <div className={["note-list-border-"+item.lablecolor]}>
+      {item.lable.map((lable, index) =>
+        <div className="note-list-border" key={index.toString()}>
+          <div className={["note-list-border-"+lable.color]}>
             <div className="note-list-text">
-              {item.labletext}
+              {lable.text}
             </div>
           </div>
         </div>
+      )}
       <div className="note-list-text">
         {item.text}
       </div>
@@ -270,7 +278,9 @@ function MenuList(props) {
 function ChangeItem(props) {
   let {changeisActive, handleChangeClick, mapItem, setMapItem, itemIndex } = props;
   let item = mapItem[itemIndex];
-  let [changeItem, setChangeItem] = useState();
+  let [changeItem, setChangeItem] = useState({});
+  let [lable, setLable] = useState({});  
+  let newChangeItem = Object.assign(changeItem, {lable:[lable]});
 
   let changeSubmit = (e) => {
     setMapItem([...mapItem.slice(0, itemIndex), e, ...mapItem.slice(itemIndex+1)]);
@@ -285,15 +295,15 @@ function ChangeItem(props) {
             <div>标签文字</div>
             <input 
               type="text"
-              defaultValue={item.labletext}
-              onChange={e =>setChangeItem({...changeItem, labletext:e.target.value})}
+              defaultValue={item.lable[0].text}
+              onChange={e =>setLable({...lable, text:e.target.value})}
               />
           </div>
           <div className="dialog-content">
             <div>标签颜色</div>
             <select
-              defaultValue={item.lablecolor}
-              onChange={e =>setChangeItem({...changeItem, lablecolor:e.target.value})}
+              defaultValue={item.lable[0].color}
+              onChange={e =>setLable({...lable, color:e.target.value})}
             >
               <option value="red">red</option>
               <option value="blue">blue</option>
@@ -324,7 +334,7 @@ function ChangeItem(props) {
           </div>
           <div className="dialog-button">
             <button onClick={() => handleChangeClick(changeisActive=false)}>取消</button>
-            <button onClick={() => changeSubmit(changeItem)}>提交</button>
+            <button onClick={() => changeSubmit(newChangeItem)}>提交</button>
           </div>
         </fieldset>
       </div>
